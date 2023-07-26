@@ -1,0 +1,81 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --color-bg-header: #1B1D23;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'System UI', sans-serif;';
+    background-color: #2C313C;
+}
+
+#custom-titlebar {
+    height: 30px;
+    background-color: var(--color-bg-header);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+}
+
+#custom-titlebar h1 {
+    margin: 0;
+    font-size: 18px;
+}
+
+header.drag-region {
+    -webkit-app-region: drag;
+    width: 100%;
+    /* Modifie la largeur à 100% */
+    height: 30px;
+    position: relative;
+    z-index: -1;
+}
+
+/* Désactive les événements de pointeur (clics, survols, etc.) pour les éléments de la barre de glissement */
+header.drag-region * {
+    pointer-events: none;
+}
+
+.custom-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Styles pour les icônes */
+.icon-container {
+    width: 30px;
+    height: 30px;
+    top: -30px;
+    cursor: pointer;
+    z-index: 1;
+    float: right;
+    position: relative;
+    transition: 0.2s;
+    color: #fff;
+    padding: 5px;
+    /* Enlever le drag */
+    -webkit-app-region: no-drag;
+}
+
+.icon-container:hover {
+    background-color: #4F9FEE;
+}
+
+.icon-container img {
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block;
+}
