@@ -4,6 +4,8 @@ let isDragging = false;
 let initialX = 0;
 let initialY = 0;
 let divSize = 200;
+const drawnShapes = [];
+
 const divElement = document.querySelector('.centrer_background_fff_dessin');
 divElement.style.width = divSize + 'px';
 divElement.style.height = divSize + 'px';
@@ -327,6 +329,14 @@ function startDrawingMode() {
   document.querySelector('.centrer_background_fff_dessin').addEventListener('mousemove', handleDrawingMove);
 }
 
+function undoDrawing() {
+  if (drawnShapes.length > 0) {
+    // Supprimez la dernière forme dessinée de la zone de dessin
+    const lastShape = drawnShapes.pop();
+    lastShape.remove();
+  }
+}
+
 function handleDrawingClick(event) {
   if (isDrawing) {
     // Récupérez les coordonnées du clic de la souris
@@ -338,6 +348,7 @@ function handleDrawingClick(event) {
 
     // Ajoutez la forme à la zone de dessin
     document.querySelector('.centrer_background_fff_dessin').appendChild(drawnShape);
+    drawnShapes.push(drawnShape); // Ajoutez la forme au tableau
   }
 }
 
@@ -390,4 +401,12 @@ const ovalShapeButton = document.getElementById('oval-shape-btn');
 ovalShapeButton.addEventListener('click', () => {
   // Activez le mode de dessin
   startDrawingMode();
+});
+
+// Raccourci clavier pour annuler le dessin (Ctrl + Z)
+document.addEventListener('keydown', (event) => {
+  // Vérifiez si la touche "Ctrl" (ou "Cmd" sur macOS) est enfoncée et que la touche "Z" est pressée
+  if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
+    undoDrawing();
+  }
 });
