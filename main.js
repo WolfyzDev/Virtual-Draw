@@ -3,24 +3,23 @@ const { app, BrowserWindow, ipcMain, screen } = require('electron');
 let mainWindow;
 
 function createWindow() {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+
   mainWindow = new BrowserWindow({
-    // Définir la largeur et la hauteur de la fenêtre aux maximums
     width: width,
     height: height,
-    frame: false, // Désactiver la barre de titre par défaut d'Electron
+    frame: false,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      webviewTag: true,
     },
-    // Définir l'icône de la fenêtre
     icon: 'src/assets/logo.png',
   });
 
   mainWindow.loadFile('src/index.html');
-  
-  mainWindow.setBackgroundColor("#272C36")
-  // Intercepter les événements pour minimiser, agrandir et fermer la fenêtre
+
   ipcMain.on('minimize-window', () => {
     mainWindow.minimize();
   });
@@ -37,7 +36,7 @@ function createWindow() {
     mainWindow.close();
   });
 
-  ipcMain.on('move-window', (event, { deltaX, deltaY }) => {
+  ipcMain.on('move-window', ({ deltaX, deltaY }) => {
     const currentPosition = mainWindow.getPosition();
     const [currentX, currentY] = currentPosition;
     mainWindow.setPosition(currentX + deltaX, currentY + deltaY);
