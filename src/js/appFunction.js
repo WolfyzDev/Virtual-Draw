@@ -1,4 +1,6 @@
 const { ipcRenderer } = require('electron');
+// Import de startDrag
+import { startDrag } from './startDrag.js';
 
 let isDragging = false;
 let initialX = 0;
@@ -9,12 +11,6 @@ const drawnShapes = [];
 const divElement = document.querySelector('.centrer_background_fff_dessin');
 divElement.style.width = divSize + 'px';
 divElement.style.height = divSize + 'px';
-
-function startDrag(e) {
-  isDragging = true;
-  initialX = e.screenX;
-  initialY = e.screenY;
-}
 
 function doDrag(e) {
   if (isDragging) {
@@ -28,6 +24,8 @@ function stopDrag() {
   isDragging = false;
 }
 
+
+
 document.addEventListener('DOMContentLoaded', () => {
   // Récupère les boutons de la barre personnalisée
   const minimizeButton = document.getElementById('minimize-btn');
@@ -39,7 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
   maximizeButton.addEventListener('click', () => ipcRenderer.send('maximize-window'));
   closeButton.addEventListener('click', () => ipcRenderer.send('close-window'));
 
-  document.getElementById('custom-titlebar').addEventListener('mousedown', startDrag);
+  document.getElementById('custom-titlebar').addEventListener('mousedown', (e) => {
+    startDrag(e);
+  });
+
   document.addEventListener('mousemove', doDrag);
   document.addEventListener('mouseup', stopDrag);
 
@@ -406,8 +407,6 @@ document.addEventListener('keydown', (event) => {
     undoDrawing();
   }
 });
-
-
 
 const borderradiuscentral = document.getElementById('border-radius-central');
 
