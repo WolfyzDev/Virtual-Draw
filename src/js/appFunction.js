@@ -1,30 +1,26 @@
 const { ipcRenderer } = require('electron');
-// Import de startDrag
-import { startDrag } from './startDrag.js';
+const DragTitleBar = require('./js/Drag.js');
+const svgButtons = document.querySelectorAll('.sidebar svg');
+const divElement = document.querySelector('.centrer_background_fff_dessin');
+const resizeHandle = document.querySelector('.resize-handle');
+const selectionBox = document.querySelector('.selection-box');
+const borderradiuscentral = document.getElementById('border-radius-central');
+const drawnShapes = [];
 
-let isDragging = false;
+let isResizing = false;
+let initialWidth = 0;
+let initialHeight = 0;
 let initialX = 0;
 let initialY = 0;
 let divSize = 200;
-const drawnShapes = [];
+let isSelecting = false;
+let initialXSelection, initialYSelection, finalX, finalY;
+let isDrawing = false;
+let initialXDrag, initialYDrag;
+let drawnShape = null;
 
-const divElement = document.querySelector('.centrer_background_fff_dessin');
 divElement.style.width = divSize + 'px';
 divElement.style.height = divSize + 'px';
-
-function doDrag(e) {
-  if (isDragging) {
-    const deltaX = e.screenX - initialX;
-    const deltaY = e.screenY - initialY;
-    ipcRenderer.send('move-window', { deltaX, deltaY });
-  }
-}
-
-function stopDrag() {
-  isDragging = false;
-}
-
-
 
 document.addEventListener('DOMContentLoaded', () => {
   // Récupère les boutons de la barre personnalisée
@@ -36,13 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
   minimizeButton.addEventListener('click', () => ipcRenderer.send('minimize-window'));
   maximizeButton.addEventListener('click', () => ipcRenderer.send('maximize-window'));
   closeButton.addEventListener('click', () => ipcRenderer.send('close-window'));
+  CustomTitleBar = document.getElementById('custom-titlebar');
 
-  document.getElementById('custom-titlebar').addEventListener('mousedown', (e) => {
-    startDrag(e);
-  });
-
-  document.addEventListener('mousemove', doDrag);
-  document.addEventListener('mouseup', stopDrag);
+  CustomTitleBar.addEventListener('mousedown', DragTitleBar.startDrag);
+  document.addEventListener('mousemove', DragTitleBar.doDrag);
+  document.addEventListener('mouseup', DragTitleBar.stopDrag);
 
   resizeHandle.addEventListener('mousedown', (e) => {
     isResizing = true;
@@ -84,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Récupérez les éléments du formulaire de paramètres
   const widthInput = document.getElementById('width');
   const heightInput = document.getElementById('height');
-  const borderRadiusInput = document.getElementById('border-radius-central');
 
   // Ajoutez des écouteurs d'événements aux éléments du formulaire
   widthInput.addEventListener('input', (e) => {
@@ -104,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
       divElement.style.height = divSize + 'px';
     }
   });
-
 
   // Imiter un click sur le bouton de maximisation dés que la fenêtre est chargée
   ipcRenderer.send('maximize-window');
@@ -128,11 +120,8 @@ document.addEventListener('wheel', (event) => {
     const widthInput = document.getElementById('width');
     widthInput.value = divSize;
   }
+
 });
-const resizeHandle = document.querySelector('.resize-handle');
-let isResizing = false;
-let initialWidth = 0;
-let initialHeight = 0;
 
 resizeHandle.addEventListener('mousedown', (e) => {
   isResizing = true;
@@ -144,18 +133,15 @@ resizeHandle.addEventListener('mousedown', (e) => {
   divElement.classList.add('resizable-hover');
 });
 
-const selectionBox = document.querySelector('.selection-box');
-let isSelecting = false;
-let initialXSelection, initialYSelection, finalX, finalY;
-
 document.body.addEventListener('mousedown', (e) => {
   const target = e.target;
   const isClickableElement = target.classList.contains('header') ||
     target.classList.contains('sidebar') ||
     target.classList.contains('resize-handle') ||
     target.classList.contains('centrer_background_fff_dessin') ||
+    target.classList.contains('right') ||
+    target.classList.contains('drag-region') ||
     target.classList.contains('content-box');
-
   if (!isClickableElement) {
     isSelecting = true;
     initialXSelection = e.clientX;
@@ -236,21 +222,9 @@ document.body.addEventListener('mousemove', (e) => {
 
 document.body.addEventListener('mouseup', () => {
   isSelecting = false;
-
   // Cachez la boîte de sélection après la fin de la sélection
   selectionBox.style.display = 'none';
-
-  // Faites quelque chose avec les coordonnées de la sélection (par exemple, envoyez-les à une fonction de traitement)
-  handleSelection(initialXSelection, initialYSelection, finalX, finalY);
 });
-
-function handleSelection(initialX, initialY, finalX, finalY) {
-  // Faites quelque chose avec les coordonnées de la sélection ici
-  console.log(`Sélection de (${initialX}, ${initialY}) à (${finalX}, ${finalY})`);
-}
-
-// Récupérez une référence aux boutons SVG
-const svgButtons = document.querySelectorAll('.sidebar svg');
 
 // Ajoutez un gestionnaire d'événements click à chaque bouton SVG
 svgButtons.forEach((button) => {
@@ -285,9 +259,7 @@ svgButtons.forEach((button) => {
   });
 });
 
-let isDrawing = false;
-let initialXDrag, initialYDrag;
-let drawnShape = null;
+
 
 function handleDrawingMove(event) {
   if (isDrawing) {
@@ -407,8 +379,6 @@ document.addEventListener('keydown', (event) => {
     undoDrawing();
   }
 });
-
-const borderradiuscentral = document.getElementById('border-radius-central');
 
 borderradiuscentral.addEventListener('input', (e) => {
   // Mettez à jour la largeur de la div en fonction de la valeur de l'input
