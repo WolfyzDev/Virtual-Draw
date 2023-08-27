@@ -139,6 +139,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    border-radius: 0px;
 }
 
 .centrer_background_fff_dessin svg {
@@ -236,4 +237,20 @@ body {
 
 .active_svg path {
    color: #0487D9;
+}
+
+
+.image_de_fond{
+    background-color: #1F1F1F;
+    width: 50%;
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+    margin-top: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.image_de_fond:hover{
+    background-color: #292727;
 }

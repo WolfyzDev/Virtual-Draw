@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Récupérez les éléments du formulaire de paramètres
   const widthInput = document.getElementById('width');
   const heightInput = document.getElementById('height');
-  const backgroundColorInput = document.getElementById('background-color');
+  const borderRadiusInput = document.getElementById('border-radius-central');
 
   // Ajoutez des écouteurs d'événements aux éléments du formulaire
   widthInput.addEventListener('input', (e) => {
@@ -104,11 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  backgroundColorInput.addEventListener('input', (e) => {
-    // Mettez à jour la couleur de fond de la div en fonction de la valeur de l'input
-    const newBackgroundColor = e.target.value;
-    divElement.style.backgroundColor = newBackgroundColor;
-  });
 
   // Imiter un click sur le bouton de maximisation dés que la fenêtre est chargée
   ipcRenderer.send('maximize-window');
@@ -253,8 +248,6 @@ function handleSelection(initialX, initialY, finalX, finalY) {
   console.log(`Sélection de (${initialX}, ${initialY}) à (${finalX}, ${finalY})`);
 }
 
-
-// Récupérez une référence aux boutons SVG
 // Récupérez une référence aux boutons SVG
 const svgButtons = document.querySelectorAll('.sidebar svg');
 
@@ -373,7 +366,7 @@ function createShape(x, y) {
   shape.style.border = '1px solid black';
   shape.style.userSelect = 'none';
   shape.style.pointerEvents = 'none';
-  
+
   return shape;
 }
 
@@ -411,5 +404,18 @@ document.addEventListener('keydown', (event) => {
   // Vérifiez si la touche "Ctrl" (ou "Cmd" sur macOS) est enfoncée et que la touche "Z" est pressée
   if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
     undoDrawing();
+  }
+});
+
+
+
+const borderradiuscentral = document.getElementById('border-radius-central');
+
+borderradiuscentral.addEventListener('input', (e) => {
+  // Mettez à jour la largeur de la div en fonction de la valeur de l'input
+  const newWidth = parseInt(e.target.value);
+  if (!isNaN(newWidth)) {
+    divSize = newWidth;
+    divElement.style.borderRadius = divSize + 'px';
   }
 });
