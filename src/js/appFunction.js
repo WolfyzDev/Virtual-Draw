@@ -157,7 +157,8 @@ document.body.addEventListener('mousedown', (e) => {
   const isClickableElement = target.classList.contains('header') ||
     target.classList.contains('sidebar') ||
     target.classList.contains('resize-handle') ||
-    target.classList.contains('centrer_background_fff_dessin');
+    target.classList.contains('centrer_background_fff_dessin') ||
+    target.classList.contains('content-box');
 
   if (!isClickableElement) {
     isSelecting = true;
@@ -290,11 +291,6 @@ svgButtons.forEach((button) => {
   });
 });
 
-
-
-
-
-
 let isDrawing = false;
 let initialXDrag, initialYDrag;
 let drawnShape = null;
@@ -318,6 +314,7 @@ function handleDrawingMove(event) {
     drawnShape.style.top = drawnShape.offsetTop + deltaY + 'px';
   }
 }
+
 function startDrawingMode() {
   // Activez le mode de dessin
   isDrawing = true;
@@ -374,14 +371,17 @@ function createShape(x, y) {
   shape.style.borderRadius = '100%';
 
   shape.style.border = '1px solid black';
-
+  shape.style.userSelect = 'none';
+  shape.style.pointerEvents = 'none';
+  
   return shape;
 }
 
-
 // Ajoutez un gestionnaire d'événements pour désactiver le mode de dessin
-document.querySelector('.centrer_background_fff_dessin').addEventListener('dblclick', () => {
-  stopDrawingMode();
+document.addEventListener('keydown', (event) => {
+  if (event.key === "Escape") {
+    stopDrawingMode();
+  }
 });
 
 function stopDrawingMode() {
@@ -389,6 +389,9 @@ function stopDrawingMode() {
 
   // Supprimez le gestionnaire d'événements de clic de la zone de dessin
   document.querySelector('.centrer_background_fff_dessin').removeEventListener('click', handleDrawingClick);
+
+  // Supprimez le gestionnaire d'événements de déplacement de la zone de dessin
+  document.querySelector('.centrer_background_fff_dessin').removeEventListener('mousemove', handleDrawingMove);
 
   // Réinitialisez la forme dessinée
   drawnShape = null;
