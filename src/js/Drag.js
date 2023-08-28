@@ -1,8 +1,11 @@
+let isDragging = false;
+
 function startDrag(e) {
     isDragging = true;
     initialX = e.screenX;
     initialY = e.screenY;
 }
+
 function doDrag(e) {
     if (isDragging) {
         const deltaX = e.screenX - initialX;

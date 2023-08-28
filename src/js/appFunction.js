@@ -158,7 +158,7 @@ document.body.addEventListener('mousemove', (e) => {
     selectionBox.style.width = newWidth + 'px';
     selectionBox.style.height = newHeight + 'px';
 
-    const headerRect = document.querySelector('.header').getBoundingClientRect();
+    const headerRect = document.getElementById('custom-titlebar').getBoundingClientRect();
     const sidebarRect = document.querySelector('.sidebar').getBoundingClientRect();
     const resizeHandleRect = document.querySelector('.resize-handle').getBoundingClientRect();
 
@@ -237,25 +237,10 @@ svgButtons.forEach((button) => {
   });
 });
 
-// Ajoutez un gestionnaire d'événements pour désactiver le mode de dessin
-document.addEventListener('keydown', (event) => {
-  if (event.key === "Escape") {
-    shapeDrawer.stopDrawingMode();
-  }
-});
-
 // Ajoutez un gestionnaire d'événements de clic à la div ovale
 ovalShapeButton.addEventListener('click', () => {
   // Activez le mode de dessin
   shapeDrawer.startDrawingMode();
-});
-
-// Raccourci clavier pour annuler le dessin (Ctrl + Z)
-document.addEventListener('keydown', (event) => {
-  // Vérifiez si la touche "Ctrl" (ou "Cmd" sur macOS) est enfoncée et que la touche "Z" est pressée
-  if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
-    shapeDrawer.undoDrawing();
-  }
 });
 
 Borderradiuscentral.addEventListener('input', (e) => {
