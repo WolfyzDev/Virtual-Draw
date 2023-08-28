@@ -1,12 +1,17 @@
+// Importation des modules / fichiers nécessaires
 const { ipcRenderer } = require('electron');
 const DragTitleBar = require('./js/Drag.js');
+const shapeDrawer = require('./js/Draw/shapeDraw.js');
 const svgButtons = document.querySelectorAll('.sidebar svg');
 const divElement = document.querySelector('.centrer_background_fff_dessin');
 const resizeHandle = document.querySelector('.resize-handle');
 const selectionBox = document.querySelector('.selection-box');
-const borderradiuscentral = document.getElementById('border-radius-central');
-const drawnShapes = [];
+const Borderradiuscentral = document.getElementById('border-radius-central');
+const BackgroundColorCentral = document.getElementById('background-color');
+const ovalShapeButton = document.getElementById('oval-shape-btn');
+const centrer_background_fff_dessin = document.getElementById('centrer_background_fff_dessin');
 
+// Déclaration des variables
 let isResizing = false;
 let initialWidth = 0;
 let initialHeight = 0;
@@ -15,20 +20,12 @@ let initialY = 0;
 let divSize = 200;
 let isSelecting = false;
 let initialXSelection, initialYSelection, finalX, finalY;
-let isDrawing = false;
-let initialXDrag, initialYDrag;
-let drawnShape = null;
-
-divElement.style.width = divSize + 'px';
-divElement.style.height = divSize + 'px';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Récupère les boutons de la barre personnalisée
   const minimizeButton = document.getElementById('minimize-btn');
   const maximizeButton = document.getElementById('maximize-btn');
   const closeButton = document.getElementById('close-btn');
 
-  // Associer des événements de clic aux conteneurs des icônes
   minimizeButton.addEventListener('click', () => ipcRenderer.send('minimize-window'));
   maximizeButton.addEventListener('click', () => ipcRenderer.send('maximize-window'));
   closeButton.addEventListener('click', () => ipcRenderer.send('close-window'));
@@ -56,12 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const newHeight = initialHeight + deltaY;
 
       if (newWidth >= 100 && newHeight >= 100) {
-        divSize = newWidth; // Ou newHeight, selon vos besoins
+        divSize = newWidth;
 
         divElement.style.width = divSize + 'px';
         divElement.style.height = divSize + 'px';
 
-        // Mettre à jours l'input de la taille
         const widthInput = document.getElementById('width');
         widthInput.value = divSize;
       }
@@ -75,13 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
     divElement.classList.remove('resizable-hover');
   });
 
-  // Récupérez les éléments du formulaire de paramètres
   const widthInput = document.getElementById('width');
   const heightInput = document.getElementById('height');
 
-  // Ajoutez des écouteurs d'événements aux éléments du formulaire
   widthInput.addEventListener('input', (e) => {
-    // Mettez à jour la largeur de la div en fonction de la valeur de l'input
     const newWidth = parseInt(e.target.value);
     if (!isNaN(newWidth)) {
       divSize = newWidth;
@@ -90,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   heightInput.addEventListener('input', (e) => {
-    // Mettez à jour la hauteur de la div en fonction de la valeur de l'input
     const newHeight = parseInt(e.target.value);
     if (!isNaN(newHeight)) {
       divSize = newHeight;
@@ -98,25 +90,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Imiter un click sur le bouton de maximisation dés que la fenêtre est chargée
   ipcRenderer.send('maximize-window');
 });
 
 document.addEventListener('wheel', (event) => {
   if (event.ctrlKey) {
     if (event.deltaY > 0) {
-      // Réduire la taille
       divSize -= 10;
     } else {
-      // Augmenter la taille
       divSize += 10;
     }
 
-    // Mettez à jour la taille de la div
     divElement.style.width = divSize + 'px';
     divElement.style.height = divSize + 'px';
 
-    // Récuperer la valeur de la taille de la div et la mettre à jour dans l'input
     const widthInput = document.getElementById('width');
     widthInput.value = divSize;
   }
@@ -147,13 +134,12 @@ document.body.addEventListener('mousedown', (e) => {
     initialXSelection = e.clientX;
     initialYSelection = e.clientY;
 
-    // Positionnez la boîte de sélection au point initial
     selectionBox.style.left = initialXSelection + 'px';
     selectionBox.style.top = initialYSelection + 'px';
     selectionBox.style.width = '0px';
     selectionBox.style.height = '0px';
 
-    selectionBox.style.display = 'block'; // Affichez la boîte de sélection
+    selectionBox.style.display = 'block'; 
   }
 });
 
@@ -162,19 +148,16 @@ document.body.addEventListener('mousemove', (e) => {
     finalX = e.clientX;
     finalY = e.clientY;
 
-    // Calculez la nouvelle position et la nouvelle taille de la boîte de sélection
     const newX = Math.min(initialXSelection, finalX);
     const newY = Math.min(initialYSelection, finalY);
     const newWidth = Math.abs(finalX - initialXSelection);
     const newHeight = Math.abs(finalY - initialYSelection);
 
-    // Mettez à jour la position et la taille de la boîte de sélection
     selectionBox.style.left = newX + 'px';
     selectionBox.style.top = newY + 'px';
     selectionBox.style.width = newWidth + 'px';
     selectionBox.style.height = newHeight + 'px';
 
-    // Vérifiez si la sélection entre en collision avec les éléments header, sidebar ou resize-handle
     const headerRect = document.querySelector('.header').getBoundingClientRect();
     const sidebarRect = document.querySelector('.sidebar').getBoundingClientRect();
     const resizeHandleRect = document.querySelector('.resize-handle').getBoundingClientRect();
@@ -185,8 +168,6 @@ document.body.addEventListener('mousemove', (e) => {
       selectionBox.right > headerRect.left &&
       selectionBox.bottom > headerRect.top
     ) {
-      // La sélection touche le header, vous pouvez prendre des mesures ici
-      // Par exemple, réinitialiser les coordonnées de la sélection
       selectionBox.style.display = 'none';
       isSelecting = false;
       return;
@@ -198,8 +179,6 @@ document.body.addEventListener('mousemove', (e) => {
       selectionBox.right > sidebarRect.left &&
       selectionBox.bottom > sidebarRect.top
     ) {
-      // La sélection touche la sidebar, vous pouvez prendre des mesures ici
-      // Par exemple, réinitialiser les coordonnées de la sélection
       selectionBox.style.display = 'none';
       isSelecting = false;
       return;
@@ -211,7 +190,6 @@ document.body.addEventListener('mousemove', (e) => {
       selectionBox.right > resizeHandleRect.left &&
       selectionBox.bottom > resizeHandleRect.top
     ) {
-      // La sélection touche le resize-handle, vous pouvez prendre des mesures ici
       // Par exemple, réinitialiser les coordonnées de la sélection
       selectionBox.style.display = 'none';
       isSelecting = false;
@@ -259,132 +237,37 @@ svgButtons.forEach((button) => {
   });
 });
 
-
-
-function handleDrawingMove(event) {
-  if (isDrawing) {
-    // Récupérez les coordonnées de la souris
-    const x = event.clientX;
-    const y = event.clientY;
-
-    // Calculez la distance parcourue par la souris depuis le dernier événement de déplacement
-    const deltaX = x - initialXDrag;
-    const deltaY = y - initialYDrag;
-
-    // Mettez à jour les coordonnées initiales de la souris
-    initialXDrag = x;
-    initialYDrag = y;
-
-    // Mettez à jour les coordonnées de la forme dessinée
-    drawnShape.style.left = drawnShape.offsetLeft + deltaX + 'px';
-    drawnShape.style.top = drawnShape.offsetTop + deltaY + 'px';
-  }
-}
-
-function startDrawingMode() {
-  // Activez le mode de dessin
-  isDrawing = true;
-
-  // Ajoutez un gestionnaire d'événements de clic à la zone de dessin
-  document.querySelector('.centrer_background_fff_dessin').addEventListener('click', handleDrawingClick);
-
-  // Ajoutez un gestionnaire d'événements de déplacement à la zone de dessin
-  document.querySelector('.centrer_background_fff_dessin').addEventListener('mousemove', handleDrawingMove);
-}
-
-function undoDrawing() {
-  if (drawnShapes.length > 0) {
-    // Supprimez la dernière forme dessinée de la zone de dessin
-    const lastShape = drawnShapes.pop();
-    lastShape.remove();
-  }
-}
-
-function handleDrawingClick(event) {
-  if (isDrawing) {
-    // Récupérez les coordonnées du clic de la souris
-    const x = event.clientX;
-    const y = event.clientY;
-
-    // Créez la forme que vous souhaitez dessiner (ovale, cercle, etc.)
-    drawnShape = createShape(x, y);
-
-    // Ajoutez la forme à la zone de dessin
-    document.querySelector('.centrer_background_fff_dessin').appendChild(drawnShape);
-    drawnShapes.push(drawnShape); // Ajoutez la forme au tableau
-  }
-}
-
-// Fonction pour créer la forme (à personnaliser selon vos besoins)
-function createShape(x, y) {
-  const shape = document.createElement('div');
-  shape.classList.add('drawn-shape');
-
-  // Calculez les coordonnées relativement à la div centrale
-  const centralDiv = document.querySelector('.centrer_background_fff_dessin');
-  const centralDivRect = centralDiv.getBoundingClientRect();
-  const relativeX = x - centralDivRect.left;
-  const relativeY = y - centralDivRect.top;
-
-  // Appliquez les coordonnées calculées
-  shape.style.position = 'absolute';
-  shape.style.left = relativeX + 'px';
-  shape.style.top = relativeY + 'px';
-
-  shape.style.width = '50px';
-  shape.style.height = '30px';
-  // Mettre une sorte de bordure radius autour de la forme dessinée une forme de ovale
-  shape.style.borderRadius = '100%';
-
-  shape.style.border = '1px solid black';
-  shape.style.userSelect = 'none';
-  shape.style.pointerEvents = 'none';
-
-  return shape;
-}
-
 // Ajoutez un gestionnaire d'événements pour désactiver le mode de dessin
 document.addEventListener('keydown', (event) => {
   if (event.key === "Escape") {
-    stopDrawingMode();
+    shapeDrawer.stopDrawingMode();
   }
 });
-
-function stopDrawingMode() {
-  isDrawing = false;
-
-  // Supprimez le gestionnaire d'événements de clic de la zone de dessin
-  document.querySelector('.centrer_background_fff_dessin').removeEventListener('click', handleDrawingClick);
-
-  // Supprimez le gestionnaire d'événements de déplacement de la zone de dessin
-  document.querySelector('.centrer_background_fff_dessin').removeEventListener('mousemove', handleDrawingMove);
-
-  // Réinitialisez la forme dessinée
-  drawnShape = null;
-}
-
-// Récupérez la div ovale
-const ovalShapeButton = document.getElementById('oval-shape-btn');
 
 // Ajoutez un gestionnaire d'événements de clic à la div ovale
 ovalShapeButton.addEventListener('click', () => {
   // Activez le mode de dessin
-  startDrawingMode();
+  shapeDrawer.startDrawingMode();
 });
 
 // Raccourci clavier pour annuler le dessin (Ctrl + Z)
 document.addEventListener('keydown', (event) => {
   // Vérifiez si la touche "Ctrl" (ou "Cmd" sur macOS) est enfoncée et que la touche "Z" est pressée
   if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
-    undoDrawing();
+    shapeDrawer.undoDrawing();
   }
 });
 
-borderradiuscentral.addEventListener('input', (e) => {
+Borderradiuscentral.addEventListener('input', (e) => {
   // Mettez à jour la largeur de la div en fonction de la valeur de l'input
   const newWidth = parseInt(e.target.value);
   if (!isNaN(newWidth)) {
     divSize = newWidth;
     divElement.style.borderRadius = divSize + 'px';
   }
+});
+
+BackgroundColorCentral.addEventListener('input', (e) => {
+  const newBackgroundColor = e.target.value;
+  centrer_background_fff_dessin.style.backgroundColor = newBackgroundColor;
 });

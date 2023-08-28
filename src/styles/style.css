@@ -138,8 +138,8 @@ body {
     transition: border 0.2s;
     color: #0D0D0D;
     position: absolute;
-    width: 50%;
-    height: 50%;
+    width: 200px;
+    height: 200px;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
