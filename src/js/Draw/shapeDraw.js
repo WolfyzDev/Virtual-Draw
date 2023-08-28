@@ -2,8 +2,17 @@ const mode = document.getElementById('Mode');
 const canvas = document.getElementById('centrer_background_fff_dessin');
 const listeShape = [];
 let drawingMode = false;
+let isDragging = false;
+let startDragAdded = false;
 
+function handleMouseDown(event) {
+    isDragging = false;
+}
 function startDrag(event) {
+    if (!startDragAdded) {
+        canvas.addEventListener('mousedown', handleMouseDown);
+        startDragAdded = true;
+    }
     if (drawingMode) {
         const x = event.clientX;
         const y = event.clientY;
@@ -91,6 +100,8 @@ function removeShape() {
     // Supprimer la forme de la liste des formes
     listeShape.pop();
 
+    console.log(listeShape);
+
 }
 
 function startDrawingMode() {
@@ -109,7 +120,6 @@ function startDrawingMode() {
             removeShape();
         }
     });
-
 }
 
 module.exports = {
