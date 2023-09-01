@@ -91,18 +91,20 @@ function DragShapeSilouette(event) {
 }
 
 function removeShape() {
-    // Récupérer la div parent
-    const div = document.querySelector('.shape-contenaire');
+    if (listeShape.length > 0) {
+        // Récupérer la div parent
+        const div = document.querySelector('.shape-contenaire');
 
-    // Supprimer la div parent
-    canvas.removeChild(div);
+        // Supprimer la div parent
+        canvas.removeChild(div);
 
-    // Supprimer la forme de la liste des formes
-    listeShape.pop();
+        // Supprimer la forme de la liste des formes
+        listeShape.pop();
 
-    console.log(listeShape);
-
+        console.log(listeShape);
+    }
 }
+
 
 function startDrawingMode() {
     console.log(listeShape);
